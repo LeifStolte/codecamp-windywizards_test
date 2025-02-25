@@ -1,6 +1,7 @@
 """Script for the Week 3 assignment."""
 import codecamp
 import os
+import matplotlib.pyplot as plt
 
 # Data selection ______________________________________________
 
@@ -19,6 +20,9 @@ t_wind_start = 0
 # Calc _________________________________________________
 
 # Call load_resp and load_wind with the correct relative path
-codecamp.load_resp(filename_resp,t_resp_start)
-codecamp.load_wind(filename_wind,t_wind_start)
+t, u, xb, xt = codecamp.load_resp(filename_resp,t_resp_start)
+t_wind, u_wind = codecamp.load_wind(filename_wind,t_wind_start)
 
+# Plot _____________________________________________________
+
+codecamp.plot_resp(t, u, xb, xt)
