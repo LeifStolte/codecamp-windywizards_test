@@ -15,16 +15,6 @@ def load_resp(path_resp, t_start = 60):
     u = data[i:, 1]  # Second column: V(m/s)
     xb = data[i:, 2]  # Third column: xb(m)
     xt = data[i:, 3]  # Fourth column: xt(m)
-<<<<<<< HEAD
-=======
-
-    # Print first few values for verification
-    print("t:", t[:5])
-    print("u:", u[:5])
-    print("xb:", xb[:5])
-    print("xt:", xt[:5])
-
->>>>>>> c59ff3a318ea8737ad32d4af0d2b668aa641cfb3
     return t, u, xb, xt
 
 def load_wind(path_resp, t_start = 0):
@@ -40,3 +30,37 @@ def load_wind(path_resp, t_start = 0):
     u_wind = data[i:, 1]  # Second column: V(m/s)
 
     return t_wind, u_wind
+
+def load_turbie_parameters(path):
+    processed_data = []
+    parameter_names = []
+
+    with open(path,'r') as file:
+        lines = file.readlines()
+
+    for line in lines:
+        if not line[0] == "%":
+            parts = line.strip().split('%')
+            parts2 = parts[1].strip().split()
+            if len(parts) == 2:
+                processed_data.append(float(parts[0].strip()))
+                parameter_names.append(parts2[0])
+
+    parameters = dict(zip(parameter_names,processed_data))
+    return parameters
+
+
+def get_turbie_system_matrices(path):
+    """Return M, C, K from a txt file path that contains the parameters names and values"""
+    parameters = load_turbie_parameters(path)
+    m1 = parameters['mb'] 
+    m2 = parameters['mn'] + parameters['mt'] + parameters['mh']
+    c1 = parameters['c1']
+    c2 = parameters['c2']
+    k1 = parameters['k1']
+    k2 = parameters['k2']
+    M = np.array([[m1, 0],[0, m2]])
+    C = np.array([[c1, -c1],[-c1, c1+c2]])
+    K = np.array([k1, -k2], [-k1, k1+k2])
+    return M, C, K
+
