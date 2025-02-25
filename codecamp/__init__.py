@@ -17,8 +17,8 @@ def load_resp(path_resp, t_start = 0):
     xt = data[i:, 3]  # Fourth column: xt(m)
 
     # Print first few values for verification
-    print("Time:", t[:5])
-    print("Velocity:", u[:5])
+    print("t:", t[:5])
+    print("u:", u[:5])
     print("xb:", xb[:5])
     print("xt:", xt[:5])
 
