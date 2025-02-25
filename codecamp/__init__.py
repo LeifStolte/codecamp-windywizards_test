@@ -62,7 +62,7 @@ def load_turbie_parameters(path):
 def get_turbie_system_matrices(path):
     """Return M, C, K from a txt file path that contains the parameters names and values"""
     parameters = load_turbie_parameters(path)
-    m1 = parameters['mb'] 
+    m1 = 3 * parameters['mb'] 
     m2 = parameters['mn'] + parameters['mt'] + parameters['mh']
     c1 = parameters['c1']
     c2 = parameters['c2']
@@ -70,8 +70,10 @@ def get_turbie_system_matrices(path):
     k2 = parameters['k2']
     M = np.array([[m1, 0],[0, m2]])
     C = np.array([[c1, -c1],[-c1, c1+c2]])
-    K = np.array([k1, -k2], [-k1, k1+k2])
+    K = np.array([[k1, -k1], [-k1, k1+k2]])
     return M, C, K
+
+
 
 
 def plot_resp(t, u, xb, xt):
@@ -80,34 +82,29 @@ def plot_resp(t, u, xb, xt):
     output: None"""
     
     # Create subplots with improved spacing
-    fig, axs = plt.subplots(3, 1, figsize=(9, 4))
+    fig, axs = plt.subplots(2, 1, figsize=(9, 4))
+    axs = tuple(axs)
 
     # First plot
     axs[0].plot(t, u, color='tab:blue', linewidth=0.5)
-    axs[0].set_title('U over Time', fontsize=12, fontweight='bold')
-    axs[0].set_xlabel('$t$ in [s]', fontsize=10)
-    axs[0].set_ylabel('$u(t)$ in [m/s]', fontsize=10)
+    #axs[0].set_title('U over Time', fontsize=12, fontweight='bold')
+    #axs[0].set_xlabel('$t$ in [s]', fontsize=10)
+    #axs[0].set_ylabel('$u(t)$ in [m/s]', fontsize=10)
     axs[0].grid(True, linestyle='--', alpha=0.6)
-    axs[0].set_xlim(60,600)
+    axs[0].set_xlim(60,660)
 
     # Second plot
     axs[1].plot(t, xb, color='tab:blue', linewidth=0.5)
-    axs[1].set_title('Xb over Time', fontsize=12, fontweight='bold')
-    axs[1].set_xlabel('$t$ in [s]', fontsize=10)
-    axs[1].set_ylabel('$xb(t)$ in [m]', fontsize=10)
+    #axs[1].set_title('Xb and Xtover Time', fontsize=12, fontweight='bold')
+    #axs[1].set_xlabel('$t$ in [s]', fontsize=10)
+    #axs[1].set_ylabel('$xb(t)$ in [m]', fontsize=10)
     axs[1].grid(True, linestyle='--', alpha=0.6)
-    axs[1].set_xlim(60,600)
-
-    # Third plot
-    axs[2].plot(t, xt, color='tab:blue', linewidth=0.5)
-    axs[2].set_title('Xt over Time', fontsize=12, fontweight='bold')
-    axs[2].set_xlabel('$t$ in [s]', fontsize=10)
-    axs[2].set_ylabel('$xt(t)$ in [m]', fontsize=10)
-    axs[2].grid(True, linestyle='--', alpha=0.6)
-    axs[2].set_xlim(60,600)
+    axs[1].set_xlim(60,660)
+    axs[1].plot(t, xt, color='purple', linewidth=0.5)
 
     # Show the plot
     fig.tight_layout()
     plt.show()
+    return fig, axs
     
 
