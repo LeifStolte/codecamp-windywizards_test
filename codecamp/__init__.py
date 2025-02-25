@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 def load_resp(path_resp, t_start = 60):
     """Load the data t, u, xb & xt, skipping the header row
     Input: filename, t_start"
-    Output: t, u, xb, xt ""
+    Output: t, u, xb, xt """
     # Load the data, skipping the header row
     data = np.loadtxt(path_resp, skiprows=1)
     #create a start and end value for loading our data
@@ -23,8 +23,8 @@ def load_resp(path_resp, t_start = 60):
 
 def load_wind(path_resp, t_start = 0):
     """Load the data u & t, skipping the header row
-    Input: filename, t_start"
-    Output:t_wind, u_wind" ""
+    Input: filename, t_start
+    Output:t_wind, u_wind"""
     # Load the data, skipping the header row
     data = np.loadtxt(path_resp, skiprows=1)
     #create a start and end value for loading our data

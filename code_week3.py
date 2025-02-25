@@ -20,7 +20,6 @@ t_wind_start = 0
 
 # Calc _________________________________________________
 
-# Call load_resp and load_wind with the correct relative path
 t, u, xb, xt = codecamp.load_resp(filename_resp,t_resp_start)
 t_wind, u_wind = codecamp.load_wind(filename_wind,t_wind_start)
 codecamp.load_wind(filename_wind,t_wind_start)
