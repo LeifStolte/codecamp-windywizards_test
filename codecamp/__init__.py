@@ -15,8 +15,6 @@ def load_resp(path_resp, t_start = 60):
     u = data[i:, 1]  # Second column: V(m/s)
     xb = data[i:, 2]  # Third column: xb(m)
     xt = data[i:, 3]  # Fourth column: xt(m)
-<<<<<<< HEAD
-=======
 
     # Print first few values for verification
     print("t:", t[:5])
@@ -24,7 +22,6 @@ def load_resp(path_resp, t_start = 60):
     print("xb:", xb[:5])
     print("xt:", xt[:5])
 
->>>>>>> c59ff3a318ea8737ad32d4af0d2b668aa641cfb3
     return t, u, xb, xt
 
 def load_wind(path_resp, t_start = 0):
