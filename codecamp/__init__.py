@@ -1,9 +1,12 @@
 """Turbie functions.
 """
 import numpy as np
+import matplotlib.pyplot as plt
 
 def load_resp(path_resp, t_start = 60):
-    """An example function in a package."""
+    """Load the data t, u, xb & xt, skipping the header row
+    Input: filename, t_start"
+    Output: t, u, xb, xt ""
     # Load the data, skipping the header row
     data = np.loadtxt(path_resp, skiprows=1)
     #create a start and end value for loading our data
@@ -15,10 +18,13 @@ def load_resp(path_resp, t_start = 60):
     u = data[i:, 1]  # Second column: V(m/s)
     xb = data[i:, 2]  # Third column: xb(m)
     xt = data[i:, 3]  # Fourth column: xt(m)
+
     return t, u, xb, xt
 
 def load_wind(path_resp, t_start = 0):
-    """An example function in a package."""
+    """Load the data u & t, skipping the header row
+    Input: filename, t_start"
+    Output:t_wind, u_wind" ""
     # Load the data, skipping the header row
     data = np.loadtxt(path_resp, skiprows=1)
     #create a start and end value for loading our data
@@ -30,8 +36,11 @@ def load_wind(path_resp, t_start = 0):
     u_wind = data[i:, 1]  # Second column: V(m/s)
 
     return t_wind, u_wind
-
+  
 def load_turbie_parameters(path):
+    """from a txt file path that contains the parameters names and values, creates a dictionary
+    Input: filename
+    Output: parameters (dictionary { Name(str): Values(float)}"""
     processed_data = []
     parameter_names = []
 
@@ -63,4 +72,42 @@ def get_turbie_system_matrices(path):
     C = np.array([[c1, -c1],[-c1, c1+c2]])
     K = np.array([k1, -k2], [-k1, k1+k2])
     return M, C, K
+
+
+def plot_resp(t, u, xb, xt):
+    """Plots 3 graphs from  u(t) , xb(t) and xt(t)
+    input: t, u, xb, xt (list of float)
+    output: None"""
+    
+    # Create subplots with improved spacing
+    fig, axs = plt.subplots(3, 1, figsize=(9, 4))
+
+    # First plot
+    axs[0].plot(t, u, color='tab:blue', linewidth=0.5)
+    axs[0].set_title('U over Time', fontsize=12, fontweight='bold')
+    axs[0].set_xlabel('$t$ in [s]', fontsize=10)
+    axs[0].set_ylabel('$u(t)$ in [m/s]', fontsize=10)
+    axs[0].grid(True, linestyle='--', alpha=0.6)
+    axs[0].set_xlim(60,600)
+
+    # Second plot
+    axs[1].plot(t, xb, color='tab:blue', linewidth=0.5)
+    axs[1].set_title('Xb over Time', fontsize=12, fontweight='bold')
+    axs[1].set_xlabel('$t$ in [s]', fontsize=10)
+    axs[1].set_ylabel('$xb(t)$ in [m]', fontsize=10)
+    axs[1].grid(True, linestyle='--', alpha=0.6)
+    axs[1].set_xlim(60,600)
+
+    # Third plot
+    axs[2].plot(t, xt, color='tab:blue', linewidth=0.5)
+    axs[2].set_title('Xt over Time', fontsize=12, fontweight='bold')
+    axs[2].set_xlabel('$t$ in [s]', fontsize=10)
+    axs[2].set_ylabel('$xt(t)$ in [m]', fontsize=10)
+    axs[2].grid(True, linestyle='--', alpha=0.6)
+    axs[2].set_xlim(60,600)
+
+    # Show the plot
+    fig.tight_layout()
+    plt.show()
+    
 
