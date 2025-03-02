@@ -108,4 +108,26 @@ def plot_resp(t, u, xb, xt):
     plt.show()
     return fig, axs
     
+def calculate_ct(u_wind, path_ct):
+    """Calculates the interpolated thrust coefficient (Ct) for the mean wind velocity.
+    Input:  u_wind (array): Array of wind velocity values [m/s].
+            path_ct (str): Path to the file containing Ct curve data.
+    Output: ct (float): Interpolated Ct value corresponding to the mean wind velocity.
+    """
+
+    # Load CT data (skipping the header row)
+    data = np.loadtxt(path_ct, skiprows=1)
+    
+    # Extract columns: wind speed and CT curve
+    u_ct = data[:, 0]  # First column: wind speed [m/s]
+    ct_curve = data[:, 1]  # Second column: thrust coefficient
+
+    # Compute the mean wind speed
+    u_mean = np.mean(np.array(u_wind))
+    print(f"Average velocity u_mean = {u_mean:.3f} [m/s]")
+
+    # Interpolate to determine the CT value
+    ct = np.interp(u_mean, u_ct, ct_curve)
+    return ct
+
 
