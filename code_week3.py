@@ -1,7 +1,6 @@
 """Script for the Week 3 assignment."""
 import codecamp
 import os
-import matplotlib.pyplot as plt
 
 # Data selection ______________________________________________
 

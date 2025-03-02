@@ -1,16 +1,46 @@
 """Script for the Week 4 assignment."""
 import codecamp
 import os
+import numpy as np
+import os
 
+# Get the absolute path of the parent directory
 parent_dir = os.path.dirname(__file__)
-# W4P2: Calculate the interpolated thrust coefficient (Ct) for the mean wind velocity.
-# filenames
-filename_ct = parent_dir + r"\data\CT.txt"
-filename_wind = parent_dir + r"\data\wind_12_ms_TI_0.1.txt"
 
-# Call load_wind for u_wind
-t_wind, u_wind = codecamp.load_wind(filename_wind, t_start=0)
+filename_resp = parent_dir + r"\data\resp_12_ms_TI_0.1.txt"
+filename_wind = parent_dir + r"\data\wind_12_ms_TI_0.1.txt"
+filename_param = parent_dir + r"\data\turbie_parameters.txt"
+filename_ct = parent_dir + r"\data\CT.txt"
+
+# Input ______________________________________________
+
+# in s
+t_resp_start = 60 
+t_wind_start = 0 
+t_test = 1 # time of the wind speed
+y = [1, 2, 3, 4]
+
+# Load Data ____________________________________________
+
+t, u, xb, xt = codecamp.load_resp(filename_resp,t_resp_start)
+t_wind, u_wind = codecamp.load_wind(filename_wind,t_wind_start)
+parameters = codecamp.load_turbie_parameters(filename_param)
+rotor_Dr = parameters.get("Dr")
+rho = parameters.get("rho")
+
+# Calc _________________________________________________
 
 # Compute the CT value
 ct = codecamp.calculate_ct(u_wind, filename_ct)
+rotor_area = np.pi * (rotor_Dr / 2) ** 2
+M, C, K = codecamp.get_turbie_system_matrices(filename_param)
+dydt = codecamp.calculate_dydt(t_test, y, M, C, K, rho, ct, rotor_area, t_wind, u_wind)
+
+# Plot _____________________________________________________
+
+#codecamp.plot_resp(t, u, xb, xt)
+
+# Results __________________________________________________
+
 print(f"Computed CT value ct = {ct:.3f}")
+print("Calculated dydt =", dydt)

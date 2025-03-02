@@ -58,7 +58,6 @@ def load_turbie_parameters(path):
     parameters = dict(zip(parameter_names,processed_data))
     return parameters
 
-
 def get_turbie_system_matrices(path):
     """Return M, C, K from a txt file path that contains the parameters names and values"""
     parameters = load_turbie_parameters(path)
@@ -72,9 +71,6 @@ def get_turbie_system_matrices(path):
     C = np.array([[c1, -c1],[-c1, c1+c2]])
     K = np.array([[k1, -k1], [-k1, k1+k2]])
     return M, C, K
-
-
-
 
 def plot_resp(t, u, xb, xt):
     """Plots 3 graphs from  u(t) , xb(t) and xt(t)
@@ -129,5 +125,38 @@ def calculate_ct(u_wind, path_ct):
     # Interpolate to determine the CT value
     ct = np.interp(u_mean, u_ct, ct_curve)
     return ct
+
+def calculate_dydt(t, y, M, C, K, rho = None, ct = None, rotor_area = None, t_wind = None,  u_wind = None): 
+    """
+    Computes the time derivative of the state vector y for a two-degree-of-freedom system.
+    Input:
+    - t (float): Time 
+    - y (numpy array): State vector (array)
+    - M (numpy array): Mass matrix (array(2,2))
+    - C (numpy array): Damping matrix (array(2,2))
+    - K (numpy array): Stiffness matrix (array(2,2))
+    - rho (float, optional): Air density [kg/m^3]
+    - ct (float, optional): Thrust coefficient [-]
+    - rotor_area (float, optional): Rotor area [m^2]
+    - t_wind (numpy array, optional): Time array for wind speed series [s]
+    - u_wind (numpy array, optional): Wind speed array [m/s]
+
+    Output: 
+    - dydt (numpy array): Time derivative of the state vector y (1D array of shape)
+    """
+
+    Ndof = M.shape[0] 
+    M_inv = np.linalg.inv(M)
+    I = np.eye(Ndof)
+    O = np.zeros((Ndof, Ndof))
+    F = np.zeros(shape=Ndof)
+    x1 = y[2]
+    u = np.interp(t, t_wind, u_wind)
+    f_aero = 0.5 * rho * ct * rotor_area * (u - x1) * np.abs(u -x1)
+    F[0] = f_aero
+    A = np.block([[O, I], [-M_inv @ K, - M_inv @ C]])
+    B = np.concatenate((np.zeros(Ndof), M_inv @ F))
+    dydt = A @ y + B
+    return dydt
 
 
