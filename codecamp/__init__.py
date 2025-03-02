@@ -87,20 +87,21 @@ def plot_resp(t, u, xb, xt):
 
     # First plot
     axs[0].plot(t, u, color='tab:blue', linewidth=0.5)
-    #axs[0].set_title('U over Time', fontsize=12, fontweight='bold')
-    #axs[0].set_xlabel('$t$ in [s]', fontsize=10)
-    #axs[0].set_ylabel('$u(t)$ in [m/s]', fontsize=10)
+    axs[0].set_title('Velocity $u$', fontweight='bold')
+    axs[0].set_xlabel('$t$ in [s]')
+    axs[0].set_ylabel('$u(t)$ in [m/s]')
     axs[0].grid(True, linestyle='--', alpha=0.6)
     axs[0].set_xlim(60,660)
 
     # Second plot
-    axs[1].plot(t, xb, color='tab:blue', linewidth=0.5)
-    #axs[1].set_title('Xb and Xtover Time', fontsize=12, fontweight='bold')
-    #axs[1].set_xlabel('$t$ in [s]', fontsize=10)
-    #axs[1].set_ylabel('$xb(t)$ in [m]', fontsize=10)
+    axs[1].plot(t, xb, color='tab:blue', label= "$xb$", linewidth=0.5)
+    axs[1].plot(t, xt, color='purple', label= "$xt$", linewidth=0.5)
+    axs[1].set_title('Deflections $xb$ and $xt$', fontweight='bold')
+    axs[1].set_xlabel('$t$ in [s]')
+    axs[1].set_ylabel('$x(t)$ in [m]')
     axs[1].grid(True, linestyle='--', alpha=0.6)
     axs[1].set_xlim(60,660)
-    axs[1].plot(t, xt, color='purple', linewidth=0.5)
+    axs[1].legend()
 
     # Show the plot
     fig.tight_layout()
