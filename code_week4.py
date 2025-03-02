@@ -44,3 +44,4 @@ dydt = codecamp.calculate_dydt(t_test, y, M, C, K, rho, ct, rotor_area, t_wind, 
 
 print(f"Computed CT value ct = {ct:.3f}")
 print("Calculated dydt =", dydt)
+

@@ -129,12 +129,13 @@ def calculate_ct(u_wind, path_ct):
 def calculate_dydt(t, y, M, C, K, rho = None, ct = None, rotor_area = None, t_wind = None,  u_wind = None): 
     """
     Computes the time derivative of the state vector y for a two-degree-of-freedom system.
+
     Input:
     - t (float): Time 
-    - y (numpy array): State vector (array)
-    - M (numpy array): Mass matrix (array(2,2))
-    - C (numpy array): Damping matrix (array(2,2))
-    - K (numpy array): Stiffness matrix (array(2,2))
+    - y (numpy array): State vector of shape (4,)
+    - M (numpy array): Mass matrix of shape (2,2)
+    - C (numpy array): Damping matrix of shape (2,2)
+    - K (numpy array): Stiffness matrix of shape (2,2)
     - rho (float, optional): Air density [kg/m^3]
     - ct (float, optional): Thrust coefficient [-]
     - rotor_area (float, optional): Rotor area [m^2]
@@ -158,5 +159,3 @@ def calculate_dydt(t, y, M, C, K, rho = None, ct = None, rotor_area = None, t_wi
     B = np.concatenate((np.zeros(Ndof), M_inv @ F))
     dydt = A @ y + B
     return dydt
-
-
