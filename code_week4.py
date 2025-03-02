@@ -1,8 +1,41 @@
 """Script for the Week 4 assignment."""
 import codecamp
+import numpy as np
+import os
+
+# Get the absolute path of the parent directory
+parent_dir = os.path.dirname(__file__)
+
+filename_resp = parent_dir + r"\data\resp_12_ms_TI_0.1.txt"
+filename_wind = parent_dir + r"\data\wind_12_ms_TI_0.1.txt"
+filename_param = parent_dir + r"\data\turbie_parameters.txt"
+
+# Input ______________________________________________
+
+# in s
+t_resp_start = 60 
+t_wind_start = 0 
+t_test = 1 # time of the wind speed
+y = [1, 2, 3, 4]
 
 
-# example of how you can call a function you place in codecamp/__init__.py
-codecamp.example()
+# Calc _________________________________________________
 
-# TODO! Delete the line above and add your code to solve the weekly assignment.
+t, u, xb, xt = codecamp.load_resp(filename_resp,t_resp_start)
+t_wind, u_wind = codecamp.load_wind(filename_wind,t_wind_start)
+parameters = codecamp.load_turbie_parameters(filename_param)
+rotor_Dr = parameters.get("Dr")
+rho = parameters.get("rho")
+rotor_area = np.pi * (rotor_Dr / 2) ** 2
+M, C, K = codecamp.get_turbie_system_matrices(filename_param)
+#ct = calculate_ct(wind)
+#dydt = codecamp.calculate_dydt(t_test, y, M, C, K, rho, ct, rotor_area, t_wind, u_wind)
+
+# Plot _____________________________________________________
+
+#codecamp.plot_resp(t, u, xb, xt)
+
+
+# Results __________________________________________________
+
+print(rho, rotor_area)
