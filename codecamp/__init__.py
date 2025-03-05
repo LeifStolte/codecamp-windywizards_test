@@ -220,3 +220,12 @@ def simulate_turbie(path_wind, path_parameters, path_Ct):
     x_t = y[1, :]  # Tower deflection
     
     return t, u_wind, x_b, x_t
+
+def save_resp(t, u, xb, xt, path_save):
+    """Save the response data to a text file.
+    Input: t, u, xb, xt, path_save
+    Output: None"""
+    data = np.array([t, u, xb, xt]).T  
+    np.savetxt(fname=path_save, X=data, delimiter='\t', fmt='%.3f', header="t\t u\t xb\t xt")
+    return None
+
