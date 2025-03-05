@@ -35,13 +35,16 @@ ct = codecamp.calculate_ct(u_wind, filename_ct)
 rotor_area = np.pi * (rotor_Dr / 2) ** 2
 M, C, K = codecamp.get_turbie_system_matrices(filename_param)
 dydt = codecamp.calculate_dydt(t_test, y, M, C, K, rho, ct, rotor_area, t_wind, u_wind)
-
+t2, u2, xb, xt = codecamp.simulate_turbie(filename_wind, filename_param, filename_ct)
 # Plot _____________________________________________________
 
 #codecamp.plot_resp(t, u, xb, xt)
+codecamp.plot_resp(t2, u2, xb, xt)
 
 # Results __________________________________________________
 
 print(f"Computed CT value ct = {ct:.3f}")
 print("Calculated dydt =", dydt)
+print(f"Simulated turbie response: t = {t2}, u = {u2}, xb = {xb}, xt = {xt}")
+print("Done")
 

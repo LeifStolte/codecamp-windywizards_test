@@ -161,8 +161,6 @@ def calculate_dydt(t, y, M, C, K, rho=None, ct=None, rotor_area=None, t_wind=Non
         u = np.interp(t, t_wind, u_wind)  # Interpolated wind speed at time t
         f_aero = 0.5 * rho * ct * rotor_area * (u - x1) * np.abs(u - x1)  # Aerodynamic force
         F[0] = f_aero  # Apply aerodynamic force to the first degree of freedom
-    else:
-        F[0] = 0  # No force if wind data is not provided
 
     # Assemble matrices B and dydt
     B = np.concatenate((np.zeros(Ndof), M_inv @ F))  # Forcing vector B
