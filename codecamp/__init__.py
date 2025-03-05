@@ -121,7 +121,7 @@ def calculate_ct(u_wind, path_ct):
 
     # Compute the mean wind speed
     u_mean = np.mean(np.array(u_wind))
-    print(f"Average velocity u_mean = {u_mean:.3f} [m/s]")
+    #print(f"Average velocity u_mean = {u_mean:.3f} [m/s]")
 
     # Interpolate to determine the CT value
     ct = np.interp(u_mean, u_ct, ct_curve)
@@ -206,19 +206,19 @@ def simulate_turbie(path_wind, path_parameters, path_Ct):
     t_span = (t_wind[0], t_wind[-1])
     initial_cond = np.array([0, 0, 0, 0])
     
-    # Solve the initial value problem
+     # Solve the initial value problem
     solution = spi.solve_ivp(
         fun=calculate_dydt, 
         t_span=t_span, 
         y0=initial_cond, 
         args=(M, C, K, rho, ct, rotor_area, t_wind, u_wind),
-        t_eval=t_wind  # Ensure the solution is evaluated at the same time points as the wind data
-    )
-    
+        t_eval=t_wind,  # Ensure the solution is evaluated at the same time points as the wind data
+        method='RK23' # Use the Runge-Kutta method 23 to solve the ODE and ensure the solution is evaluated at the same time points as the wind data
+    ) 
     # Extract results
-    t = np.array(solution.t)
-    y = np.array(solution.y)
-    x_b = y[0, :] - y[1, :]  # Relative blade deflection
-    x_t = y[1, :]  # Relative tower deflection
+    t = t_wind
+    y = solution.y
+    x_b = y[0, :] - y[1, :] # Blade deflection
+    x_t = y[1, :]  # Tower deflection
     
     return t, u_wind, x_b, x_t
