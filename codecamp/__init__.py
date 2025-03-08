@@ -3,6 +3,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.integrate as spi
+import glob
+import os
 
 def load_resp(path_resp, t_start = 60):
     """Load the data t, u, xb & xt, skipping the header row
@@ -167,7 +169,7 @@ def calculate_dydt(t, y, M, C, K, rho=None, ct=None, rotor_area=None, t_wind=Non
     dydt = A @ y + B  # Time derivative of the state vector
     return dydt.flatten()  # Return the flattened dydt vector
 
-def simulate_turbie(path_wind, path_parameters, path_Ct):
+def simulate_turbie(path_wind, path_parameters, path_Ct, t_wind_start=0):
     """
     Simulate homogenous and forced responses by solving an IVP for the given parameter and wind speeds.
 
@@ -175,6 +177,7 @@ def simulate_turbie(path_wind, path_parameters, path_Ct):
     - path_wind (str or pathlib.Path): Path to the wind data file.
     - path_parameters (str or pathlib.Path): Path to the turbine parameters file.
     - path_Ct (str or pathlib.Path): Path to the Ct curve data file.
+    - t_wind_start (float): Start time of the wind data [s].
 
     Returns:
     - tuple: (t, u_wind, x_b, x_t)
@@ -184,7 +187,7 @@ def simulate_turbie(path_wind, path_parameters, path_Ct):
         - x_t (numpy array): Displacement of the tower [m].
     """
     # Load wind data
-    t_wind, u_wind = load_wind(path_resp=path_wind)
+    t_wind, u_wind = load_wind(path_resp=path_wind, t_start=t_wind_start)
     
     # Load turbine parameters
     parameters = load_turbie_parameters(path=path_parameters)
@@ -229,3 +232,70 @@ def save_resp(t, u, xb, xt, path_save):
     np.savetxt(fname=path_save, X=data, delimiter='\t', fmt='%.3f', header="t\t u\t xb\t xt")
     return None
 
+def retrieve_wind_speed_TI(filename):
+    """Retrieve the wind speed and turbulence intensity from the filename.
+    Input: filename (str)
+    Output: wind_speed (float), turbulence_intensity (float)"""
+    
+    try:
+        # Extract wind speed
+        wind_speed = float(filename.split("_")[1])
+        
+        # Extract turbulence intensity
+        turbulence_intensity = float(filename.split("_TI_")[1].split(".")[0])
+        
+    except (IndexError, ValueError) as e:
+        print(f"Error extracting data from filename {filename}: {e}")
+        return None, None
+    
+    return wind_speed, turbulence_intensity
+
+def mean_standart_deviation(t, u_wind, xb, xt):
+    """Calculate the mean and standard deviation of the deflections.
+    Input: t, u_wind, xb, xt
+    Output: mean_xb, mean_xt, std_xb, std_xt"""
+    mean_xb = np.mean(xb)
+    mean_xt = np.mean(xt)
+    std_xb = np.std(xb)
+    std_xt = np.std(xt)
+    return mean_xb, mean_xt, std_xb, std_xt
+
+#Run function on folder
+def run_wind_folder(folderpath_wind, path_param, path_ct, t_wind_start):
+    """retrieve the wind data from the data folder
+    read parameter of the wind turbine from a parameter filer
+    Look into a folder and loop over each file in the folder
+        Extract the wind speed and TI from the file name
+        Read the wind data from the file (done in simulate_turbie)
+        calculate Ct and Ct curve (done in sumilate_turbie)
+        calculate the tower and blade deflections (done in simulate_turbie)
+        calculate the mean and standard deviation of the deflections
+        plot all the wind data in a single plot
+        create a  folder to save the responds
+        save the reponse in the folder"""
+    #create list to save the data
+    wind_data_list = np.array([])
+    for file in folderpath_wind:
+        # Extract turbulence intensity and wind speed from the filename
+        wind_speed, turbulence_intensity = retrieve_wind_speed_TI(filename=file)
+        if wind_speed is None or turbulence_intensity is None:
+            continue
+
+        # Simulate the Turbie response
+        t, u_wind, x_b, x_t = simulate_turbie(path_wind=file, path_parameters=path_param, path_Ct=path_ct, t_wind_start=t_wind_start)
+
+        # Calculate the mean and standard deviation of the deflections
+        mean_xb, mean_xt, std_xb, std_xt = mean_standart_deviation(t=t, u_wind=u_wind, xb=x_b, xt=x_t)
+
+        #append the data to the list
+        wind_data_list.append([wind_speed, turbulence_intensity, mean_xb, mean_xt, std_xb, std_xt])
+    return wind_data_list
+
+
+
+
+
+
+    
+
+    
