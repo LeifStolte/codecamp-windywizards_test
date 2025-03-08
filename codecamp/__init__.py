@@ -214,8 +214,8 @@ def simulate_turbie(path_wind, path_parameters, path_Ct, t_wind_start=0):
         y0=initial_cond, 
         args=(M, C, K, rho, ct, rotor_area, t_wind, u_wind),
         t_eval=t_wind,  # Ensure the solution is evaluated at the same time points as the wind data
-        method='RK23' # Use the Runge-Kutta method 23 to solve the ODE and ensure the solution is evaluated at the same time points as the wind data
-    ) 
+        method='RK45', # Use the Runge-Kutta method 45 to solve the ODE and ensure the solution is evaluated at the same time points as the wind data
+        atol = 1e-7) 
     # Extract results
     t = t_wind
     y = solution.y
@@ -238,14 +238,15 @@ def retrieve_wind_speed_TI(filename):
     Output: wind_speed (float), turbulence_intensity (float)"""
     
     try:
+        file_name = os.path.basename(filename)
         # Extract wind speed
-        wind_speed = float(filename.split("_")[1])
+        wind_speed = float(file_name.split("_")[1])
         
         # Extract turbulence intensity
-        turbulence_intensity = float(filename.split("_TI_")[1].split(".")[0])
+        turbulence_intensity = float(file_name.split("_TI_")[1].split(".")[0])
         
     except (IndexError, ValueError) as e:
-        print(f"Error extracting data from filename {filename}: {e}")
+        print(f"Error extracting data from filename {file_name}: {e}")
         return None, None
     
     return wind_speed, turbulence_intensity
@@ -274,26 +275,65 @@ def run_wind_folder(folderpath_wind, path_param, path_ct, t_wind_start):
         create a  folder to save the responds
         save the reponse in the folder"""
     #create list to save the data
-    wind_data_list = np.array([])
-    for file in folderpath_wind:
+    wind_data_list = []
+    for file in glob.glob(os.path.join(folderpath_wind, "*.txt")):  # List all files in the folder
+        file_path = os.path.join(folderpath_wind, file)  # Create full file path
+        file_name = os.path.basename(file_path)
         # Extract turbulence intensity and wind speed from the filename
-        wind_speed, turbulence_intensity = retrieve_wind_speed_TI(filename=file)
+        wind_speed, turbulence_intensity = retrieve_wind_speed_TI(filename=file_name)
         if wind_speed is None or turbulence_intensity is None:
             continue
 
         # Simulate the Turbie response
-        t, u_wind, x_b, x_t = simulate_turbie(path_wind=file, path_parameters=path_param, path_Ct=path_ct, t_wind_start=t_wind_start)
+        t, u_wind, x_b, x_t = simulate_turbie(path_wind=file_path, path_parameters=path_param, path_Ct=path_ct, t_wind_start=t_wind_start)
 
         # Calculate the mean and standard deviation of the deflections
         mean_xb, mean_xt, std_xb, std_xt = mean_standart_deviation(t=t, u_wind=u_wind, xb=x_b, xt=x_t)
 
         #append the data to the list
         wind_data_list.append([wind_speed, turbulence_intensity, mean_xb, mean_xt, std_xb, std_xt])
+
+        print ("Calculating for:", file_name)
+
     return wind_data_list
 
 
+def plot_mean_std_comparison(data1, data2, data3):
+    
+    fig, axes = plt.subplots(4, 1, figsize=(10, 8))
+    fig.suptitle(f"Comparison of {data1[0]}, {data2[0]},  {data3[0]}", fontsize=14)
+
+    # Flatten axes for easy iteration
+    axes = axes.flatten()
+    
+    axes[1].plot(data1[:,0], label=f"{data1[0]}", marker='o')
+    axes[1].plot(data2[:,0], label=f"{data2[0]}", marker='s')
+    axes[1].plot(data3[:,0], label=f"{data3[0]}", marker='^')
+    axes[1].legend()
+    axes[1].grid(True)
+
+    axes[2].plot(data1[:,1], label=f"{data1[0]}", marker='o')
+    axes[2].plot(data2[:,1], label=f"{data2[0]}", marker='s')
+    axes[2].plot(data3[:,1], label=f"{data3[0]}", marker='^')
+    axes[2].legend()
+    axes[2].grid(True)
+
+    axes[3].plot(data1[:,2], label=f"{data1[0]}", marker='o')
+    axes[3].plot(data2[:,2], label=f"{data2[0]}", marker='s')
+    axes[3].plot(data3[:,2], label=f"{data3[0]}", marker='^')
+    axes[3].legend()
+    axes[3].grid(True)
+
+    axes[4].plot(data1[:,3], label=f"{data1[0]}", marker='o')
+    axes[4].plot(data2[:,3], label=f"{data2[0]}", marker='s')
+    axes[4].plot(data3[:,3], label=f"{data3[0]}", marker='^')
+    axes[4].legend()
+    axes[4].grid(True)
 
 
+
+    plt.tight_layout()  # Adjust layout to fit  rect=[0, 0, 1, 0.96]
+    plt.show()
 
 
     

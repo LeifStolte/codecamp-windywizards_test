@@ -12,6 +12,7 @@ import os
 import glob
 import codecamp
 import numpy as np
+import matplotlib as plt
 
 # Set the start time of the simulation
 
@@ -29,11 +30,12 @@ folderpaths = [folderpath_wind_1, folderpath_wind_2, folderpath_wind_3]
 path_param = parent_dir + r"\data\turbie_parameters.txt"
 path_ct = parent_dir + r"\data\CT.txt"
 
-dataTI = np.array([])
+"""
+dataTI = []
 #loop trough the different tubulance intensities folder
 for folderpath in folderpaths:
-    wind_data_list = np.array([])
-    for file in folderpath_wind_1:
+    wind_data_list = []
+    for file in folderpath:
         # Extract turbulence intensity and wind speed from the filename
         wind_speed, turbulence_intensity = codecamp.retrieve_wind_speed_TI(filename=file)
         if wind_speed is None or turbulence_intensity is None:
@@ -48,17 +50,18 @@ for folderpath in folderpaths:
         #append the data to the list
         wind_data_list.append([wind_speed, turbulence_intensity, mean_xb, mean_xt, std_xb, std_xt])
     #append the data to the list
-    dataTI.append(wind_data_list)
+    #dataTI.append(wind_data_list)
 
     #plot the wind data creating a new plot for each wind speed
     
+"""
 
 dataTI01 = codecamp.run_wind_folder(folderpath_wind_1, path_param, path_ct, t_wind_start)
 dataTI005 = codecamp.run_wind_folder(folderpath_wind_2, path_param, path_ct, t_wind_start)
 dataTI015 = codecamp.run_wind_folder(folderpath_wind_3, path_param, path_ct, t_wind_start)
 
-
+print(dataTI01)
+print(os.listdir(folderpath_wind_1))
     
+codecamp.plot_mean_std_comparison(dataTI01, dataTI005, dataTI015)
 
-
-    
