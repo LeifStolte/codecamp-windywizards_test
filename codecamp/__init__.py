@@ -298,42 +298,54 @@ def run_wind_folder(folderpath_wind, path_param, path_ct, t_wind_start):
     return wind_data_list
 
 
+import numpy as np
+
 def plot_mean_std_comparison(data1, data2, data3):
-    
+    # Ensure the input data is in NumPy array format
+    data1 = np.array(data1)
+    data2 = np.array(data2)
+    data3 = np.array(data3)
+
+    # Check if the data are 2D arrays
+    if data1.ndim != 2 or data2.ndim != 2 or data3.ndim != 2:
+        raise ValueError("Input data must be 2D arrays.")
+
     fig, axes = plt.subplots(4, 1, figsize=(10, 8))
-    fig.suptitle(f"Comparison of {data1[0]}, {data2[0]},  {data3[0]}", fontsize=14)
+    fig.suptitle("Comparison of Datasets", fontsize=14)
 
     # Flatten axes for easy iteration
     axes = axes.flatten()
-    
-    axes[1].plot(data1[:,0], label=f"{data1[0]}", marker='o')
-    axes[1].plot(data2[:,0], label=f"{data2[0]}", marker='s')
-    axes[1].plot(data3[:,0], label=f"{data3[0]}", marker='^')
+
+    # Plotting the data on the different subplots
+    # Here we use fixed labels instead of data1[0] (which might not be the dataset's name)
+    axes[0].plot(data1[:, 0], label="Dataset 1", marker='o')
+    axes[0].plot(data2[:, 0], label="Dataset 2", marker='s')
+    axes[0].plot(data3[:, 0], label="Dataset 3", marker='^')
+    axes[0].legend()
+    axes[0].grid(True)
+
+    axes[1].plot(data1[:, 1], label="Dataset 1", marker='o')
+    axes[1].plot(data2[:, 1], label="Dataset 2", marker='s')
+    axes[1].plot(data3[:, 1], label="Dataset 3", marker='^')
     axes[1].legend()
     axes[1].grid(True)
 
-    axes[2].plot(data1[:,1], label=f"{data1[0]}", marker='o')
-    axes[2].plot(data2[:,1], label=f"{data2[0]}", marker='s')
-    axes[2].plot(data3[:,1], label=f"{data3[0]}", marker='^')
+    axes[2].plot(data1[:, 2], label="Dataset 1", marker='o')
+    axes[2].plot(data2[:, 2], label="Dataset 2", marker='s')
+    axes[2].plot(data3[:, 2], label="Dataset 3", marker='^')
     axes[2].legend()
     axes[2].grid(True)
 
-    axes[3].plot(data1[:,2], label=f"{data1[0]}", marker='o')
-    axes[3].plot(data2[:,2], label=f"{data2[0]}", marker='s')
-    axes[3].plot(data3[:,2], label=f"{data3[0]}", marker='^')
+    axes[3].plot(data1[:, 3], label="Dataset 1", marker='o')
+    axes[3].plot(data2[:, 3], label="Dataset 2", marker='s')
+    axes[3].plot(data3[:, 3], label="Dataset 3", marker='^')
     axes[3].legend()
     axes[3].grid(True)
 
-    axes[4].plot(data1[:,3], label=f"{data1[0]}", marker='o')
-    axes[4].plot(data2[:,3], label=f"{data2[0]}", marker='s')
-    axes[4].plot(data3[:,3], label=f"{data3[0]}", marker='^')
-    axes[4].legend()
-    axes[4].grid(True)
-
-
-
-    plt.tight_layout()  # Adjust layout to fit  rect=[0, 0, 1, 0.96]
+    plt.tight_layout()  # Adjust layout to fit
     plt.show()
+
+
 
 
     
