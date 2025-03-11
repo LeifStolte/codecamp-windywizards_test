@@ -42,7 +42,7 @@ def load_wind(path_resp, t_start = 0):
   
 def load_turbie_parameters(path):
     """from a txt file path that contains the parameters names and values, creates a dictionary
-    Input: filename
+    Input: filepath
     Output: parameters (dictionary { Name(str): Values(float)}"""
     processed_data = []
     parameter_names = []
@@ -62,7 +62,9 @@ def load_turbie_parameters(path):
     return parameters
 
 def get_turbie_system_matrices(path):
-    """Return M, C, K from a txt file path that contains the parameters names and values"""
+    """Return M, C, K from a txt file path that contains the parameters names and values
+    Input: filepath
+    Output: M, C, K (numpy array)"""
     parameters = load_turbie_parameters(path)
     m1 = 3 * parameters['mb'] 
     m2 = parameters['mn'] + parameters['mt'] + parameters['mh']
@@ -148,26 +150,26 @@ def calculate_dydt(t, y, M, C, K, rho=None, ct=None, rotor_area=None, t_wind=Non
     Output: 
     - dydt (numpy array): Time derivative of the state vector y (1D array of shape (4,))
     """
-    Ndof = M.shape[0]  # Number of degrees of freedom
-    M_inv = np.linalg.inv(M)  # Inverse of the mass matrix
-    I = np.eye(Ndof)  # Identity matrix of size Ndof
+    Ndof = M.shape[0] 
+    M_inv = np.linalg.inv(M)  
+    I = np.eye(Ndof)  
 
     # Define the system matrices
-    O = np.zeros((Ndof, Ndof))  # Zero matrix of size Ndof x Ndof
-    F = np.zeros(Ndof)  # Zero vector of size Ndof
-    A = np.block([[O, I], [-M_inv @ K, -M_inv @ C]])  # System matrix A
+    O = np.zeros((Ndof, Ndof))  
+    F = np.zeros(Ndof) 
+    A = np.block([[O, I], [-M_inv @ K, -M_inv @ C]])
 
     # Define the forcing term
     if t_wind is not None:
-        x1 = y[2]  # Blade deflection
-        u = np.interp(t, t_wind, u_wind)  # Interpolated wind speed at time t
-        f_aero = 0.5 * rho * ct * rotor_area * (u - x1) * np.abs(u - x1)  # Aerodynamic force
-        F[0] = f_aero  # Apply aerodynamic force to the first degree of freedom
+        x1 = y[2] 
+        u = np.interp(t, t_wind, u_wind)
+        f_aero = 0.5 * rho * ct * rotor_area * (u - x1) * np.abs(u - x1) 
+        F[0] = f_aero 
 
     # Assemble matrices B and dydt
-    B = np.concatenate((np.zeros(Ndof), M_inv @ F))  # Forcing vector B
-    dydt = A @ y + B  # Time derivative of the state vector
-    return dydt.flatten()  # Return the flattened dydt vector
+    B = np.concatenate((np.zeros(Ndof), M_inv @ F))
+    dydt = A @ y + B 
+    return dydt.flatten() 
 
 def simulate_turbie(path_wind, path_parameters, path_Ct, t_wind_start=0):
     """
@@ -181,10 +183,10 @@ def simulate_turbie(path_wind, path_parameters, path_Ct, t_wind_start=0):
 
     Returns:
     - tuple: (t, u_wind, x_b, x_t)
-        - t (numpy array): Time of the simulated response [s].
-        - u_wind (numpy array): Streamwise wind speed [m/s].
-        - x_b (numpy array): Displacement of the blade [m].
-        - x_t (numpy array): Displacement of the tower [m].
+    - t (numpy array): Time of the simulated response [s].
+    - u_wind (numpy array): Streamwise wind speed [m/s].
+    - x_b (numpy array): Displacement of the blade [m].
+    - x_t (numpy array): Displacement of the tower [m].
     """
     # Load wind data
     t_wind, u_wind = load_wind(path_resp=path_wind, t_start=t_wind_start)
@@ -213,8 +215,7 @@ def simulate_turbie(path_wind, path_parameters, path_Ct, t_wind_start=0):
         t_span=t_span, 
         y0=initial_cond, 
         args=(M, C, K, rho, ct, rotor_area, t_wind, u_wind),
-        t_eval=t_wind,  # Ensure the solution is evaluated at the same time points as the wind data
-        method='RK45', # Use the Runge-Kutta method 45 to solve the ODE and ensure the solution is evaluated at the same time points as the wind data
+        t_eval=t_wind,
         atol = 1e-7) 
     # Extract results
     t = t_wind
@@ -263,23 +264,19 @@ def mean_standart_deviation(t, u_wind, xb, xt):
 
 #Run function on folder
 def run_wind_folder(folderpath_wind, path_param, path_ct, t_wind_start):
-    """retrieve the wind data from the data folder
-    read parameter of the wind turbine from a parameter filer
-    Look into a folder and loop over each file in the folder
-        Extract the wind speed and TI from the file name
-        Read the wind data from the file (done in simulate_turbie)
-        calculate Ct and Ct curve (done in sumilate_turbie)
-        calculate the tower and blade deflections (done in simulate_turbie)
-        calculate the mean and standard deviation of the deflections
-        plot all the wind data in a single plot
-        create a  folder to save the responds
-        save the reponse in the folder"""
-    #create list to save the data
-    wind_data_list = []
+    """Run the Turbie simulation for all wind files in a folder.
+    Input: folderpath_wind, path_param, path_ct, t_wind_start
+    Output: wind_data_list (numpy array)
+    """
+    # Create an array with 6 columns and 0 rows to save the data
+    wind_data_list = np.empty((0, 6))
+    i = 0
     for file in glob.glob(os.path.join(folderpath_wind, "*.txt")):  # List all files in the folder
+        
         file_path = os.path.join(folderpath_wind, file)  # Create full file path
         file_name = os.path.basename(file_path)
         # Extract turbulence intensity and wind speed from the filename
+        print ("Calculating for:", file_name)
         wind_speed, turbulence_intensity = retrieve_wind_speed_TI(filename=file_name)
         if wind_speed is None or turbulence_intensity is None:
             continue
@@ -290,15 +287,25 @@ def run_wind_folder(folderpath_wind, path_param, path_ct, t_wind_start):
         # Calculate the mean and standard deviation of the deflections
         mean_xb, mean_xt, std_xb, std_xt = mean_standart_deviation(t=t, u_wind=u_wind, xb=x_b, xt=x_t)
 
-        #append the data to the list
-        wind_data_list.append([wind_speed, turbulence_intensity, mean_xb, mean_xt, std_xb, std_xt])
+        #append the data to the list using numpy
+        #wind_data_list = np.append(wind_data_list, np.array([wind_speed, turbulence_intensity, mean_xb, mean_xt, std_xb, std_xt]))
+        #create a row to wind_data_list
+        wind_data_list = np.vstack([wind_data_list, np.zeros(6)])
+        wind_data_list[i,0] = wind_speed
+        wind_data_list[i,1] = turbulence_intensity
+        wind_data_list[i,2] = mean_xb       
+        wind_data_list[i,3] = mean_xt
+        wind_data_list[i,4] = std_xb
+        wind_data_list[i,5] = std_xt
 
-        print ("Calculating for:", file_name)
+        i += 1
+        
+
+    #sort the wind_data_list by wind speed
+    wind_data_list = wind_data_list[wind_data_list[:,0].argsort()]
 
     return wind_data_list
 
-
-import numpy as np
 
 def plot_mean_std_comparison(data1, data2, data3):
     # Ensure the input data is in NumPy array format
@@ -309,53 +316,63 @@ def plot_mean_std_comparison(data1, data2, data3):
     # Check if the data are 2D arrays
     if data1.ndim != 2 or data2.ndim != 2 or data3.ndim != 2:
         raise ValueError("Input data must be 2D arrays.")
+    
+    # Create a new figure for mean deflections
+    fig_mean, axes_mean = plt.subplots(2, 1, figsize=(10, 6))
+    fig_mean.suptitle("Mean Deflections", fontsize=14)
 
-    fig, axes = plt.subplots(4, 1, figsize=(10, 8))
-    fig.suptitle("Comparison of Datasets", fontsize=14)
+    # Plot mean blade deflection
+    axes_mean[0].plot(data1[:,0], data1[:, 2], label="TI = 0.1", marker='o')
+    axes_mean[0].plot(data2[:,0], data2[:, 2], label="TI = 0.05", marker='s')
+    axes_mean[0].plot(data3[:,0], data3[:, 2], label="TI = 0.15", marker='^')
+    axes_mean[0].set_xlabel('Wind speed [m/s]')
+    axes_mean[0].set_ylabel('$xb_{mean}$ [m]')
+    axes_mean[0].legend()
+    axes_mean[0].grid(True)
+    axes_mean[0].set_title('Mean blade deflection')
 
-    # Flatten axes for easy iteration
-    axes = axes.flatten()
-
-    # Plotting the data on the different subplots
-    # Here we use fixed labels instead of data1[0] (which might not be the dataset's name)
-    axes[0].plot(data1[:,0], data1[:, 2], label="TI = 0.1", marker='o')
-    axes[0].plot(data2[:,0], data2[:, 2], label="TI = 0.05", marker='s')
-    axes[0].plot(data3[:,0], data3[:, 2], label="TI = 0.15", marker='^')
-    axes[0].set_xlabel('Wind speed in [m/s]')
-    axes[0].set_ylabel('mean_xb [m]')
-    axes[0].legend()
-    axes[0].grid(True)
-    axes[0].set_title('Mean blade deflection')
-
-    axes[1].plot(data1[:,0], data1[:, 3], label="TI = 0.1", marker='o')
-    axes[1].plot(data2[:,0], data2[:, 3], label="TI = 0.05", marker='s')
-    axes[1].plot(data3[:,0], data3[:, 3], label="TI = 0.15", marker='^')
-    axes[1].set_xlabel('Wind speed in [m/s]')
-    axes[1].set_ylabel('mean_xt [m]')
-    axes[1].legend()
-    axes[1].grid(True)
-    axes[1].set_title('Mean tower deflection')
-
-    axes[2].plot(data1[:,0], data1[:, 4], label="TI = 0.1", marker='o')
-    axes[2].plot(data2[:,0], data2[:, 4], label="TI = 0.05", marker='s')
-    axes[2].plot(data3[:,0], data3[:, 4], label="TI = 0.15", marker='^')
-    axes[2].set_xlabel('Wind speed in [m/s]')
-    axes[2].set_ylabel('std_xb [m]')
-    axes[2].legend()
-    axes[2].grid(True)
-    axes[2].set_title('Standart deviation of blade deflection')
-
-    axes[3].plot(data1[:,0], data1[:, 5], label="TI = 0.1", marker='o')
-    axes[3].plot(data2[:,0], data2[:, 5], label="TI = 0.05", marker='s')
-    axes[3].plot(data3[:,0], data3[:, 5], label="TI = 0.15", marker='^')
-    axes[3].set_xlabel('Wind speed in [m/s]')
-    axes[3].set_ylabel('std_xt [m]')
-    axes[3].legend()
-    axes[3].grid(True)
-    axes[3].set_title('Standart deviation of tower deflection')
+    # Plot mean tower deflection
+    axes_mean[1].plot(data1[:,0], data1[:, 3], label="TI = 0.1", marker='o')
+    axes_mean[1].plot(data2[:,0], data2[:, 3], label="TI = 0.05", marker='s')
+    axes_mean[1].plot(data3[:,0], data3[:, 3], label="TI = 0.15", marker='^')
+    axes_mean[1].set_xlabel('Wind speed [m/s]')
+    axes_mean[1].set_ylabel('$xt_{mean}$ [m]')
+    axes_mean[1].legend()
+    axes_mean[1].grid(True)
+    axes_mean[1].set_title('Mean tower deflection')
 
     plt.tight_layout()  # Adjust layout to fit
+    #plt.show()
+
+    # Create a new figure for standard deviations
+    fig_std, axes_std = plt.subplots(2, 1, figsize=(10, 6))
+    fig_std.suptitle("Standard Deviations", fontsize=14)
+
+    # Plot standard deviation of blade deflection
+    axes_std[0].plot(data1[:,0], data1[:, 4], label="TI = 0.1", marker='o')
+    axes_std[0].plot(data2[:,0], data2[:, 4], label="TI = 0.05", marker='s')
+    axes_std[0].plot(data3[:,0], data3[:, 4], label="TI = 0.15", marker='^')
+    axes_std[0].set_xlabel('Wind speed [m/s]')
+    axes_std[0].set_ylabel('$xb_{stdev}$ [m]')
+    axes_std[0].legend()
+    axes_std[0].grid(True)
+    axes_std[0].set_title('Standard deviation of blade deflection')
+
+    # Plot standard deviation of tower deflection
+    axes_std[1].plot(data1[:,0], data1[:, 5], label="TI = 0.1", marker='o')
+    axes_std[1].plot(data2[:,0], data2[:, 5], label="TI = 0.05", marker='s')
+    axes_std[1].plot(data3[:,0], data3[:, 5], label="TI = 0.15", marker='^')
+    axes_std[1].set_xlabel('Wind speed [m/s]')
+    axes_std[1].set_ylabel('$xt_{stdev}$ [m]')
+    axes_std[1].legend()
+    axes_std[1].grid(True)
+    axes_std[1].set_title('Standard deviation of tower deflection')
+
+    plt.tight_layout()  # Adjust layout to fit
+
+    #show all the plt at the same time
     plt.show()
+
 
 
 
