@@ -1,7 +1,7 @@
 # This script is the main script for the codecamp project. It runs the codecamp module for each wind folder and plots the mean and standard deviation of the deflections for each wind folder.
 
 import os
-import src.codecamp as codecamp
+import codecamp
 
 
 # Set the start time for the evaluation of the wind data

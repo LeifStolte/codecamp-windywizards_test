@@ -18,7 +18,8 @@ authors = [
 dependencies = [
     "matplotlib",
     "numpy",
-    "scipy"
+    "scipy",
+    "pytest"
 ]
 
 [project.urls]
