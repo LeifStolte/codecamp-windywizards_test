@@ -6,11 +6,10 @@ import codecamp
 # Data selection ______________________________________________
 
 # Get the absolute path of the parent directory
-parent_dir = os.path.dirname(__file__)
 
-filename_resp = parent_dir + r"\data\resp_12_ms_TI_0.1.txt"
-filename_wind = parent_dir + r"\data\wind_12_ms_TI_0.1.txt"
-filename_param = parent_dir + r"\data\turbie_parameters.txt"
+filename_resp = r"..\data\resp_12_ms_TI_0.1.txt"
+filename_wind = r"..\data\wind_12_ms_TI_0.1.txt"
+filename_param = r"..\data\turbie_parameters.txt"
 
 # Input ______________________________________________
 
