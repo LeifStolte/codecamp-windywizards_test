@@ -7,6 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.integrate as spi
 
+def test ():
+    print("test")
+
 
 def load_resp(path_resp, t_start=60):
     """Load the data t, u, xb & xt, skipping the header row.
